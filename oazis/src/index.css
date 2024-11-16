@@ -34,8 +34,7 @@ h2, h1 {
 
 .button {
   padding: 10px 20px;
-  margin-left: 10px;
-  margin-right: 10px;
+  margin: 10px 10px 10px 10px;
   font-size: 16px;
   border: none;
   border-radius: 5px;
@@ -52,4 +51,34 @@ h2, h1 {
 
 .button:active {
   transform: translateY(1px);
+}
+
+.formField {
+  display: flex;
+  flex-direction: column;
+  margin-bottom: 15px;
+}
+
+.formField label {
+  font-size: 16px;
+  margin-bottom: 5px;
+}
+
+.formField input,
+.formField textarea {
+  padding: 8px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  font-size: 14px;
+  transition: border-color 0.3s;
+}
+
+.formField input:focus,
+.formField textarea:focus {
+  border-color: #19647E;
+  outline: none;
+}
+
+.formField textarea {
+  resize: vertical;
 }
