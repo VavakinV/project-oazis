@@ -8,7 +8,6 @@ const MainPage = () => {
   const [selectedRole, setSelectedRole] = useState(null);
 
   const handleRoleSelect = (role) => {
-    console.log("Выбранная роль: " + role);
     setSelectedRole(role);
   };
 
