@@ -1,6 +1,9 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
+import StudentLogin from './StudentLogIn';
 
 const StudentSignIn = () => {
+  const [showLogin, setShowLogin] = useState(false);
+
   const [formData, setFormData] = useState({
     lastName: '',
     firstName: '',
@@ -23,6 +26,10 @@ const StudentSignIn = () => {
     console.log('Отправленные данные:', formData);
     // Здесь можно добавить логику для обработки отправки формы
   };
+
+  if (showLogin) {
+    return <StudentLogin />;
+  }
 
   return (
     <div className="panel">
@@ -54,7 +61,7 @@ const StudentSignIn = () => {
         </div>
         <button className="button" type="submit">Зарегистрироваться</button>
       </form>
-      <button className="button" onClick={() => console.log('Переход к странице логина')}>Уже есть запись? Войти</button>
+      <h3>Уже есть запись? <a className="linkToPage" onClick={() => setShowLogin(true)}>Войти</a></h3>
     </div>
   );
 };

@@ -2,6 +2,7 @@ import { useState } from 'react';
 import RoleSelectionPanel from './components/RoleSelectionPanel';
 import StudentSignIn from './components/StudentSignIn';
 import TeacherSignIn from './components/TeacherSignIn';
+import SiteLogo from './components/SiteLogo';
 
 const MainPage = () => {
   const [selectedRole, setSelectedRole] = useState(null);
@@ -11,13 +12,22 @@ const MainPage = () => {
     setSelectedRole(role);
   };
 
-  if (selectedRole === 'student') {
-    return <StudentSignIn />;
-  } else if (selectedRole === 'teacher') {
-    return <TeacherSignIn />;
-  }
+  const handleLogoClick = () => {
+    setSelectedRole(null);
+  };
 
-  return <RoleSelectionPanel onRoleSelect={handleRoleSelect} />;
+  return (
+    <div>
+      <SiteLogo onLogoClick={handleLogoClick} />
+      {selectedRole === 'student' ? (
+        <StudentSignIn />
+      ) : selectedRole === 'teacher' ? (
+        <TeacherSignIn />
+      ) : (
+        <RoleSelectionPanel onRoleSelect={handleRoleSelect} />
+      )}
+    </div>
+  );
 };
 
 export default MainPage;
