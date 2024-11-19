@@ -22,4 +22,8 @@ urlpatterns = [
     path('admin/', admin.site.urls),
     re_path(r'^api/students/$', views.students_list),
     re_path(r'^api/students/([0-9])$', views.students_detail),
+    re_path(r'^api/teachers/$', views.teachers_list),
+    re_path(r'^api/teachers/([0-9])$', views.teachers_detail),
+    re_path(r'^api/departments/$', views.departments_list),
+    re_path(r'^api/departments/([0-9])$', views.departments_detail),
 ]
