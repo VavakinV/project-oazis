@@ -3,6 +3,10 @@
 import django.db.models.deletion
 from django.db import migrations, models
 
+def create_data(apps, schema_editor):
+    Department = apps.get_model('oazis', 'Student')
+    Department(name="Кафедра прикладной математики").save()
+
 class Migration(migrations.Migration):
 
     dependencies = [
