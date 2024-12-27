@@ -27,6 +27,7 @@ const StudentSignIn = () => {
   const handleSubmit = (e) => {
     e.preventDefault();
     axios.post(API_URL, formData).then(() => {
+      alert("Студент зарегистрирован")
       console.log(formData);
     })
   };
@@ -61,7 +62,7 @@ const StudentSignIn = () => {
         </div>
         <div className="formField">
           <label>Контактная информация:</label>
-          <textarea name="contactInfo" value={formData.contactInfo} onChange={handleChange} required />
+          <textarea name="contactInfo" value={formData.contactInfo} onChange={handleChange} />
         </div>
         <button className="button" type="submit">Зарегистрироваться</button>
       </form>

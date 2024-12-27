@@ -88,7 +88,7 @@ const TeacherSignIn = () => {
         </div>
         <div className="formField">
           <label>Дополнительная информация:</label>
-          <textarea name="additionalInfo" value={formData.additionalInfo} onChange={handleChange} required />
+          <textarea name="additionalInfo" value={formData.additionalInfo} onChange={handleChange}/>
         </div>
         <button className="button" type="submit">Зарегистрироваться</button>
       </form>

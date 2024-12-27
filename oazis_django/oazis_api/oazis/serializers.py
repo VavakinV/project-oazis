@@ -2,12 +2,12 @@ from rest_framework import serializers
 from .models import Student, Teacher, Department
 
 class StudentSerializer(serializers.ModelSerializer):
-    lastname = serializers.RegexField(regex=r'^[A-Za-zА-Яа-я\-]+$', max_length=240, required=True)
-    firstname = serializers.RegexField(regex=r'^[A-Za-zА-Яа-я\-]+$', max_length=240, required=True)
-    group = serializers.RegexField(regex=r'^[A-Za-z0-9А-Яа-я\-\.\/]+$', max_length=20, required=True)
+    lastname = serializers.RegexField(regex=r'^[A-Za-zА-ЯЁа-яё\-]+$', max_length=240, required=True)
+    firstname = serializers.RegexField(regex=r'^[A-Za-zА-ЯЁа-яё\-]+$', max_length=240, required=True)
+    group = serializers.RegexField(regex=r'^[A-Za-z0-9А-ЯЁа-яё\-\.\/]+$', max_length=20, required=True)
     email = serializers.EmailField(required=True)
     password = serializers.CharField(max_length=50, required=True)
-    contactInfo = serializers.CharField(max_length=500, required=True)
+    contactInfo = serializers.CharField(max_length=500)
     registrationDate = serializers.DateField(read_only=True)
 
     class Meta:
@@ -32,13 +32,13 @@ class StudentSerializer(serializers.ModelSerializer):
     
 
 class TeacherSerializer(serializers.ModelSerializer):
-    lastname = serializers.RegexField(regex=r'^[A-Za-zА-Яа-я\-]+$', max_length=240, required=True)
-    firstname = serializers.RegexField(regex=r'^[A-Za-zА-Яа-я\-]+$', max_length=240, required=True)
-    fathername = serializers.RegexField(regex=r'^[A-Za-zА-Яа-я\-]+$', max_length=240, required=True)
+    lastname = serializers.RegexField(regex=r'^[A-Za-zА-ЯЁа-яё\-]+$', max_length=240, required=True)
+    firstname = serializers.RegexField(regex=r'^[A-Za-zА-ЯЁа-яё\-]+$', max_length=240, required=True)
+    fathername = serializers.RegexField(regex=r'^[A-Za-zА-ЯЁа-яё\-]+$', max_length=240)
     department = serializers.PrimaryKeyRelatedField(queryset=Department.objects.all(), required=True)
     email = serializers.EmailField(required=True)
     password = serializers.CharField(max_length=50, required=True)
-    additionalInfo = serializers.CharField(max_length=500, required=True)
+    additionalInfo = serializers.CharField(max_length=500)
     registrationDate = serializers.DateField(read_only=True)
 
     class Meta:
@@ -62,7 +62,7 @@ class TeacherSerializer(serializers.ModelSerializer):
         return instance
 
 class DepartmentSerializer(serializers.ModelSerializer):
-    name = serializers.RegexField(regex=r'^[A-Za-zА-Яа-я\-]+$', max_length=240, required=True)
+    name = serializers.RegexField(regex=r'^[A-Za-zА-ЯЁа-яё\-]+$', max_length=240, required=True)
 
     class Meta:
         model = Teacher
