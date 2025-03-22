@@ -2,8 +2,8 @@ from rest_framework.response import Response
 from rest_framework.decorators import api_view
 from rest_framework import status
 
-from .models import Student, Teacher, Department
-from .serializers import StudentSerializer, TeacherSerializer, DepartmentSerializer
+from .models import Student, Teacher, Department, Coursework
+from .serializers import StudentSerializer, TeacherSerializer, DepartmentSerializer, CourseworkSerializer
 
 def handle_list(request, model, serializer_class):
     if request.method == 'GET':
@@ -58,3 +58,11 @@ def departments_list(request):
 @api_view(['PUT', 'DELETE'])
 def departments_detail(request, pk):
     return handle_detail(request, Department, DepartmentSerializer, pk)
+
+@api_view(['GET', 'POST'])
+def courseworks_list(request):
+    return handle_list(request, Coursework, CourseworkSerializer)
+
+@api_view(['PUT', 'DELETE'])
+def courseworks_detail(request, pk):
+    return handle_detail(request, Coursework, CourseworkSerializer, pk)

@@ -26,4 +26,6 @@ urlpatterns = [
     re_path(r'^api/teachers/([0-9])$', views.teachers_detail),
     re_path(r'^api/departments/$', views.departments_list),
     re_path(r'^api/departments/([0-9])$', views.departments_detail),
+    re_path(r'api/courseworks/$', views.courseworks_list),
+    re_path(r'api/courseworks/([0-9])$', views.courseworks_detail)
 ]

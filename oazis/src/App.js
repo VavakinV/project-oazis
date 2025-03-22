@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import RoleSelectionPanel from './components/RoleSelectionPanel';
-import StudentSignIn from './components/StudentSignIn';
-import TeacherSignIn from './components/TeacherSignIn';
+import StudentLogIn from './components/StudentLogIn';
+import TeacherLogIn from './components/TeacherLogIn';
 import SiteLogo from './components/SiteLogo';
 
 const MainPage = () => {
@@ -19,9 +19,9 @@ const MainPage = () => {
     <div>
       <SiteLogo onLogoClick={handleLogoClick} />
       {selectedRole === 'student' ? (
-        <StudentSignIn />
+        <StudentLogIn />
       ) : selectedRole === 'teacher' ? (
-        <TeacherSignIn />
+        <TeacherLogIn />
       ) : (
         <RoleSelectionPanel onRoleSelect={handleRoleSelect} />
       )}

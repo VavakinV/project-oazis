@@ -1,9 +1,10 @@
 from rest_framework import serializers
-from .models import Student, Teacher, Department
+from .models import Student, Teacher, Department, Coursework
 
 class StudentSerializer(serializers.ModelSerializer):
     lastname = serializers.RegexField(regex=r'^[A-Za-zА-ЯЁа-яё\-]+$', max_length=240, required=True)
     firstname = serializers.RegexField(regex=r'^[A-Za-zА-ЯЁа-яё\-]+$', max_length=240, required=True)
+    fathername = serializers.RegexField(regex=r'^[A-Za-zА-ЯЁа-яё\-]+$', max_length=240, required=True)
     group = serializers.RegexField(regex=r'^[A-Za-z0-9А-ЯЁа-яё\-\.\/]+$', max_length=20, required=True)
     email = serializers.EmailField(required=True)
     password = serializers.CharField(max_length=50, required=True)
@@ -12,7 +13,7 @@ class StudentSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Student
-        fields = ('pk', 'lastname', 'firstname', 'group', 'email', 'password', 'contactInfo', 'registrationDate')
+        fields = '__all__'
 
     def create(self, validated_data):
         password = validated_data.pop('password')
@@ -43,7 +44,7 @@ class TeacherSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Teacher
-        fields = ('pk', 'lastname', 'firstname', 'fathername', 'department', 'email', 'password', 'additionalInfo', 'registrationDate')
+        fields = '__all__'
 
     def create(self, validated_data):
         password = validated_data.pop('password')
@@ -60,13 +61,18 @@ class TeacherSerializer(serializers.ModelSerializer):
             setattr(instance, attr, value)
         instance.save()
         return instance
+    
+class CourseworkSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Coursework
+        fields = '__all__'
 
 class DepartmentSerializer(serializers.ModelSerializer):
     name = serializers.RegexField(regex=r'^[A-Za-zА-ЯЁа-яё\-]+$', max_length=240, required=True)
 
     class Meta:
         model = Teacher
-        fields = ('pk', 'name')
+        fields = '__all__'
 
     def create(self, validated_data):
         department = Department(**validated_data)

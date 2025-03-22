@@ -10,9 +10,10 @@ class Department(models.Model):
 class Student(models.Model):
     lastname = models.CharField("Lastname", max_length=240)
     firstname = models.CharField("Firstname", max_length=240)
+    fathername = models.CharField("Fathername", max_length=240, blank=True, null=True)
     group = models.CharField("Group", max_length=20)
-    email = models.EmailField()
-    password = models.CharField("Password", max_length=50)
+    email = models.EmailField(blank=True, null=True)
+    password = models.CharField("Password", max_length=50, blank=True, null=True)
     contactInfo = models.CharField("ContactInfo", max_length=500, blank=True, null=True)
     registrationDate = models.DateField("Registration Date", auto_now_add=True)
 
@@ -24,7 +25,7 @@ class Student(models.Model):
         return check_password(raw_password, self.password)
 
     def __str__(self):
-        return f'{self.firstname} {self.lastname}'
+        return f'{self.lastname} {self.firstname} {self.fathername}'
 
 class Teacher(models.Model):
     lastname = models.CharField("Lastname", max_length=240)
@@ -44,4 +45,24 @@ class Teacher(models.Model):
         return check_password(raw_password, self.password)
 
     def __str__(self):
-        return f'{self.firstname} {self.lastname}'
+        return f'{self.lastname} {self.firstname} {self.fathername}'
+
+class Coursework(models.Model):
+    STATUS_CHOICES = [
+        (0, 'Отклонено'),
+        (1, 'Ожидание'),
+        (2, 'Одобрено'),
+        (3, 'Защищено'),
+    ]
+
+    student = models.ForeignKey(Student, on_delete=models.CASCADE, related_name='courseworks', verbose_name='Студент')
+    main_teacher = models.ForeignKey(Teacher, on_delete=models.CASCADE, related_name='main_courseworks', verbose_name='Основной преподаватель')
+    backup_teacher = models.ForeignKey(Teacher, on_delete=models.SET_NULL, null=True, blank=True, related_name='backup_courseworks', verbose_name='Запасной преподаватель')
+    topic = models.CharField("Topic", max_length=500, blank=True, null=True)
+    status = models.IntegerField("Status", choices=STATUS_CHOICES, default=1)  # По умолчанию "Ожидание"
+    has_application = models.BooleanField("Application signed", default=False)  # Флаг наличия заявления
+    grade = models.IntegerField("Grade", blank=True, null=True)
+    creationDate = models.DateField("Creation Date", auto_now_add=True)
+
+    def __str__(self):
+        return f'Курсовая работа студента {self.student} (Статус: {self.get_status_display()})'

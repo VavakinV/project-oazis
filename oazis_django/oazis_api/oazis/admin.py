@@ -1,24 +1,21 @@
 from django.contrib import admin
-from .models import Department, Student, Teacher
+from .models import Department, Student, Teacher, Coursework
 
-# Регистрация модели Department
 @admin.register(Department)
 class DepartmentAdmin(admin.ModelAdmin):
     list_display = ('id', 'name')  # Поля для отображения в списке
     search_fields = ('name',)      # Поля для поиска
     ordering = ('name',)           # Сортировка по имени
 
-
-# Регистрация модели Student
 @admin.register(Student)
 class StudentAdmin(admin.ModelAdmin):
-    list_display = ('id', 'firstname', 'lastname', 'group', 'email', 'contactInfo','registrationDate')  # Поля для отображения
-    search_fields = ('lastname', 'firstname', 'email', 'group')                          # Поля для поиска
+    list_display = ('id', 'firstname', 'lastname', 'fathername', 'group', 'email', 'contactInfo','registrationDate')  # Поля для отображения
+    search_fields = ('lastname', 'firstname', 'fathername', 'email', 'group')                          # Поля для поиска
     list_filter = ('group', 'registrationDate')                                         # Фильтры по группе и дате
-    ordering = ('lastname', 'firstname')                                               # Сортировка по фамилии и имени
+    ordering = ('lastname', 'firstname', 'fathername')                                               # Сортировка по ФИО
     fieldsets = (                                                                      # Группировка полей в форме
         ('Основная информация', {
-            'fields': ('lastname', 'firstname', 'group', 'email', 'contactInfo')
+            'fields': ('lastname', 'firstname', 'fathername', 'group', 'email', 'contactInfo')
         }),
         ('Пароль', {
             'fields': ('password',),
@@ -30,15 +27,13 @@ class StudentAdmin(admin.ModelAdmin):
     )
     readonly_fields = ('registrationDate',)  # Поля только для чтения
 
-
-# Регистрация модели Teacher
 @admin.register(Teacher)
 class TeacherAdmin(admin.ModelAdmin):
     list_display = ('id', 'firstname', 'lastname', 'fathername', 'department', 'email', 'additionalInfo', 'registrationDate')  # Поля для отображения
     search_fields = ('lastname', 'firstname', 'fathername', 'email', 'department__name')                    # Поля для поиска
     list_filter = ('department', 'registrationDate')                                                       # Фильтры по департаменту и дате
-    ordering = ('lastname', 'firstname')                                                                  # Сортировка
-    fieldsets = (                                                                                         # Группировка полей
+    ordering = ('lastname', 'firstname', 'fathername')                                                     # Сортировка
+    fieldsets = (                                                                                          # Группировка полей
         ('Основная информация', {
             'fields': ('lastname', 'firstname', 'fathername', 'department', 'email', 'additionalInfo')
         }),
@@ -51,3 +46,12 @@ class TeacherAdmin(admin.ModelAdmin):
         }),
     )
     readonly_fields = ('registrationDate',)  # Поля только для чтения
+
+@admin.register(Coursework)
+class CourseworkAdmin(admin.ModelAdmin):
+    list_display = ('id', 'student', 'main_teacher', 'status', 'has_application', 'grade', 'creationDate')
+    list_filter = ('status', 'has_application')
+    search_fields = ('student__lastname', 'student__firstname', 'main_teacher', 'topic')
+    ordering = ('student', 'main_teacher')
+    readonly_fields = ('creationDate',) 
+

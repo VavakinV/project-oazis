@@ -1,59 +1,67 @@
-import { useState } from 'react';
-import StudentSignIn from './StudentSignIn';
+import { useState, useEffect } from 'react';
+import Select from 'react-select';
+import StudentCourseworks from './StudentCourseworks';
 
 const StudentLogin = () => {
-    const [showSignIn, setShowSignIn] = useState(false);
+    const [students, setStudents] = useState([]);
+    const [selectedStudent, setSelectedStudent] = useState(null);
+    const [isLoggedIn, setIsLoggedIn] = useState(false);
 
-    const [loginData, setLoginData] = useState({
-        email: '',
-        password: '',
-    });
+    useEffect(() => {
+        const fetchStudents = async () => {
+            try {
+                const response = await fetch('http://127.0.0.1:8000/api/students/');
+                if (!response.ok) {
+                    throw new Error('Ошибка при загрузке данных');
+                }
+                const data = await response.json();
 
-    const handleChange = (e) => {
-        const { name, value } = e.target;
-        setLoginData({
-        ...loginData,
-        [name]: value,
-        });
+                const formattedStudents = data.map(student => ({
+                    value: student.id,
+                    label: `${student.lastname} ${student.firstname} ${student.fathername}`,
+                }));
+                setStudents(formattedStudents);
+            } catch (error) {
+                console.error('Ошибка при загрузке студентов:', error);
+            }
+        };
+
+        fetchStudents();
+    }, []);
+
+    const handleStudentChange = (selectedOption) => {
+        setSelectedStudent(selectedOption);
     };
 
-    const handleSubmit = (e) => {
-        e.preventDefault();
-        console.log('Отправленные данные для входа:', loginData);
-        // Здесь можно добавить логику для обработки отправки формы
+    const handleLogin = () => {
+        if (selectedStudent) {
+            sessionStorage.setItem('currentStudentId', selectedStudent.value);
+            console.log('Выбранный студент:', selectedStudent.value);
+            setIsLoggedIn(true);
+        } else {
+            alert('Пожалуйста, выберите студента');
+        }
     };
 
-    if (showSignIn){
-        return <StudentSignIn/>
+    if (isLoggedIn) {
+        return <StudentCourseworks />;
     }
 
     return (
         <div className="panel">
-        <h2>Вход</h2>
-        <form onSubmit={handleSubmit}>
+            <h2>Вход</h2>
             <div className="formField">
-            <label>Email:</label>
-            <input
-                type="email"
-                name="email"
-                value={loginData.email}
-                onChange={handleChange}
-                required
-            />
+                <label>Выберите ваш ФИО из списка:</label>
+                <Select
+                    options={students}
+                    value={selectedStudent}
+                    onChange={handleStudentChange}
+                    placeholder="Начинайте вводить ФИО..."
+                    isSearchable
+                    noOptionsMessage={() => "Студент не найден"}
+                />
             </div>
-            <div className="formField">
-            <label>Пароль:</label>
-            <input
-                type="password"
-                name="password"
-                value={loginData.password}
-                onChange={handleChange}
-                required
-            />
-            </div>
-            <button className="button" type="submit">Войти</button>
-        </form>
-            <h3>Нет аккаунта? <a className="linkToPage" onClick={() => setShowSignIn(true)}>Зарегистрироваться</a></h3>
+            <button className="button" onClick={handleLogin}>Войти</button>
         </div>
     );
 };
