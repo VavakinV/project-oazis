@@ -1,13 +1,25 @@
 import React, { useState, useEffect } from 'react';
+import '../css/StudentCourseworks.css';
 
 const StudentCourseworks = () => {
     const [courseworks, setCourseworks] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
+    const [teachers, setTeachers] = useState({});
 
     const studentId = sessionStorage.getItem('currentStudentId');
+    
+    // Функция для отображения статуса текстом
+    const renderStatus = (status) => {
+        switch (status) {
+            case 0: return 'Отклонено';
+            case 1: return 'Ожидание';
+            case 2: return 'Одобрено';
+            case 3: return 'Защищено';
+            default: return 'Неизвестно';
+        }
+    };
 
-    // Загрузка курсовых работ студента
     useEffect(() => {
         if (!studentId) {
             setError('Студент не выбран');
@@ -15,17 +27,29 @@ const StudentCourseworks = () => {
             return;
         }
 
-        const fetchCourseworks = async () => {
+        const fetchData = async () => {
             try {
-                const response = await fetch(`http://127.0.0.1:8000/api/courseworks/`);
-                if (!response.ok) {
+                const [courseworksRes, teachersRes] = await Promise.all([
+                    fetch(`http://127.0.0.1:8000/api/courseworks/`),
+                    fetch(`http://127.0.0.1:8000/api/teachers/`)
+                ]);
+
+                if (!courseworksRes.ok || !teachersRes.ok) {
                     throw new Error('Ошибка при загрузке данных');
                 }
-                const data = await response.json();
 
-                // Фильтруем курсовые работы по ID студента
-                const studentCourseworks = data.filter(cw => cw.student == studentId);
-                setCourseworks(studentCourseworks);
+                const [courseworksData, teachersData] = await Promise.all([
+                    courseworksRes.json(),
+                    teachersRes.json()
+                ]);
+
+                const teachersMap = teachersData.reduce((acc, teacher) => {
+                    acc[teacher.id] = formatTeacherName(teacher);
+                    return acc;
+                }, {});
+
+                setTeachers(teachersMap);
+                setCourseworks(courseworksData.filter(cw => cw.student == studentId));
             } catch (error) {
                 setError(error.message);
             } finally {
@@ -33,65 +57,107 @@ const StudentCourseworks = () => {
             }
         };
 
-        fetchCourseworks();
+        fetchData();
     }, [studentId]);
 
-    // Отображение статуса курсовой работы
-    const renderStatus = (status) => {
+    const formatTeacherName = (teacher) => {
+        if (!teacher) return 'Не указано';
+        const { lastname = '', firstname = '', fathername = '' } = teacher;
+        const firstInitial = firstname ? `${firstname[0]}.` : '';
+        const fatherInitial = fathername ? ` ${fathername[0]}.` : '';
+        return `${lastname} ${firstInitial}${fatherInitial}`.trim();
+    };
+
+    const getStatusClass = (status) => {
         switch (status) {
-            case 0:
-                return 'Отклонено';
-            case 1:
-                return 'Ожидание';
-            case 2:
-                return 'Одобрено';
-            case 3:
-                return 'Защищено';
-            default:
-                return 'Неизвестно';
+            case 0: return 'status-rejected';
+            case 1: return 'status-pending';
+            case 2: return 'status-approved';
+            case 3: return 'status-defended';
+            default: return '';
         }
     };
 
-    if (loading) {
-        return <div>Загрузка...</div>;
-    }
+    const handleLogout = () => {
+        sessionStorage.removeItem('currentStudentId');
+        window.location.reload();
+    };
 
-    if (error) {
-        return <div>Ошибка: {error}</div>;
-    }
+    if (loading) return (
+        <div className="panel">
+            <div className="loading-spinner"></div>
+            <p>Загрузка данных...</p>
+        </div>
+    );
+
+    if (error) return (
+        <div className="panel">
+            <div className="error-message">
+                <h2>Ошибка</h2>
+                <p>{error}</p>
+                <button className="button" onClick={handleLogout}>Выйти</button>
+            </div>
+        </div>
+    );
 
     return (
-        <div className="panel">
-            <h2>Мои курсовые работы</h2>
+        <div className="panel coursework-panel">
+            <div className="coursework-header">
+                <h2>Мои курсовые работы</h2>
+                <button className="button logout-button" onClick={handleLogout}>
+                    Выйти
+                </button>
+            </div>
+            
             {courseworks.length === 0 ? (
-                <p>У вас нет курсовых работ.</p>
+                <div className="no-courseworks">
+                    <p>У вас нет активных курсовых работ</p>
+                </div>
             ) : (
-                <table>
-                    <thead>
-                        <tr>
-                            <th>Тема</th>
-                            <th>Основной преподаватель</th>
-                            <th>Запасной преподаватель</th>
-                            <th>Статус</th>
-                            <th>Заявление</th>
-                            <th>Оценка</th>
-                            <th>Дата создания</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {courseworks.map(cw => (
-                            <tr key={cw.id}>
-                                <td>{cw.topic || 'Не указано'}</td>
-                                <td>{cw.main_teacher}</td>
-                                <td>{cw.backup_teacher || 'Не указано'}</td>
-                                <td>{renderStatus(cw.status)}</td>
-                                <td>{cw.has_application ? 'Да' : 'Нет'}</td>
-                                <td>{cw.grade || 'Не оценено'}</td>
-                                <td>{new Date(cw.creationDate).toLocaleDateString()}</td>
+                <div className="table-container">
+                    <table className="coursework-table">
+                        <thead>
+                            <tr>
+                                <th className="topic-column">Тема работы</th>
+                                <th>Руководитель</th>
+                                <th>Запасной руководитель</th>
+                                <th>Статус</th>
+                                <th>Заявление</th>
+                                <th>Оценка</th>
+                                <th>Дата</th>
                             </tr>
-                        ))}
-                    </tbody>
-                </table>
+                        </thead>
+                        <tbody>
+                            {courseworks.map(cw => (
+                                <tr key={cw.id} className="coursework-row">
+                                    <td className="topic-cell" title={cw.topic || 'Тема не указана'}>
+                                        {cw.topic || '—'}
+                                    </td>
+                                    <td>{teachers[cw.main_teacher] || '—'}</td>
+                                    <td>{cw.backup_teacher ? (teachers[cw.backup_teacher] || '—') : '—'}</td>
+                                    <td>
+                                        <span className={`status-badge ${getStatusClass(cw.status)}`}>
+                                            {renderStatus(cw.status)}
+                                        </span>
+                                    </td>
+                                    <td>
+                                        <span className={`application-badge ${cw.has_application ? 'submitted' : 'not-submitted'}`}>
+                                            {cw.has_application ? '✓' : '✗'}
+                                        </span>
+                                    </td>
+                                    <td className="grade-cell">
+                                        {cw.grade || (
+                                            <span className="no-grade">—</span>
+                                        )}
+                                    </td>
+                                    <td>
+                                        {new Date(cw.creationDate).toLocaleDateString('ru-RU')}
+                                    </td>
+                                </tr>
+                            ))}
+                        </tbody>
+                    </table>
+                </div>
             )}
         </div>
     );

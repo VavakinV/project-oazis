@@ -1,0 +1,69 @@
+.teacher-login-panel {
+    max-width: 500px;
+    width: 90%;
+    margin: 30px auto;
+    padding: 30px;
+    background-color: #fff;
+    border-radius: 10px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+}
+
+.login-title {
+    color: #19647E;
+    text-align: center;
+    margin-bottom: 25px;
+    font-size: 1.8rem;
+}
+
+.formField {
+    margin-bottom: 20px;
+}
+
+.formField label {
+    display: block;
+    margin-bottom: 8px;
+    font-weight: 500;
+    color: #19647E;
+}
+
+.password-input {
+    width: 100%;
+    padding: 12px 15px;
+    border: 1px solid #ced4da;
+    border-radius: 6px;
+    font-size: 16px;
+    transition: border-color 0.3s;
+}
+
+.password-input:focus {
+    border-color: #00B7FF;
+    outline: none;
+    box-shadow: 0 0 0 2px rgba(0, 183, 255, 0.2);
+}
+
+.login-button {
+    width: 100%;
+    padding: 12px;
+    margin-top: 15px;
+    background-color: #19647E;
+    font-size: 16px;
+    transition: background-color 0.3s;
+}
+
+.login-button:hover {
+    background-color: #00B7FF;
+}
+
+.login-button:disabled {
+    background-color: #cccccc;
+    cursor: not-allowed;
+}
+
+.error-message {
+    color: #c62828;
+    background-color: #ffebee;
+    padding: 12px;
+    border-radius: 6px;
+    margin-bottom: 20px;
+    text-align: center;
+}

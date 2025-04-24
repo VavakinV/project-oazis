@@ -37,7 +37,6 @@ class TeacherSerializer(serializers.ModelSerializer):
     firstname = serializers.RegexField(regex=r'^[A-Za-zА-ЯЁа-яё\-]+$', max_length=240, required=True)
     fathername = serializers.RegexField(regex=r'^[A-Za-zА-ЯЁа-яё\-]+$', max_length=240)
     department = serializers.PrimaryKeyRelatedField(queryset=Department.objects.all(), required=True)
-    email = serializers.EmailField(required=True)
     password = serializers.CharField(max_length=50, required=True)
     additionalInfo = serializers.CharField(max_length=500)
     registrationDate = serializers.DateField(read_only=True)

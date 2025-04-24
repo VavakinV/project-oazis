@@ -32,7 +32,6 @@ class Teacher(models.Model):
     firstname = models.CharField("Firstname", max_length=240)
     fathername = models.CharField("Fathername", max_length=240, blank=True, null=True)
     department = models.ForeignKey(Department, on_delete=models.CASCADE)
-    email = models.EmailField()
     password = models.CharField("Password", max_length=50)
     additionalInfo = models.CharField("AdditionalInfo", max_length=500, blank=True, null=True)
     registrationDate = models.DateField("Registration Date", auto_now_add=True)
@@ -43,6 +42,17 @@ class Teacher(models.Model):
     def check_password(self, raw_password):
         from django.contrib.auth.hashers import check_password
         return check_password(raw_password, self.password)
+    
+    def get_short_name(self):
+        lastname = self.lastname.strip() if self.lastname else ''
+        firstname = self.firstname.strip() if self.firstname else ''
+        fathername = self.fathername.strip() if self.fathername else ''
+        
+        formatted_firstname = f"{firstname[0]}." if firstname else ''
+        formatted_fathername = f" {fathername[0]}." if fathername else ''
+        
+        short_name = f"{lastname} {formatted_firstname}{formatted_fathername}".strip()
+        return short_name
 
     def __str__(self):
         return f'{self.lastname} {self.firstname} {self.fathername}'
@@ -59,8 +69,8 @@ class Coursework(models.Model):
     main_teacher = models.ForeignKey(Teacher, on_delete=models.CASCADE, related_name='main_courseworks', verbose_name='Основной преподаватель')
     backup_teacher = models.ForeignKey(Teacher, on_delete=models.SET_NULL, null=True, blank=True, related_name='backup_courseworks', verbose_name='Запасной преподаватель')
     topic = models.CharField("Topic", max_length=500, blank=True, null=True)
-    status = models.IntegerField("Status", choices=STATUS_CHOICES, default=1)  # По умолчанию "Ожидание"
-    has_application = models.BooleanField("Application signed", default=False)  # Флаг наличия заявления
+    status = models.IntegerField("Status", choices=STATUS_CHOICES, default=1)
+    has_application = models.BooleanField("Application signed", default=False)
     grade = models.IntegerField("Grade", blank=True, null=True)
     creationDate = models.DateField("Creation Date", auto_now_add=True)
 

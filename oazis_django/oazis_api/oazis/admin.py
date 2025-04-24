@@ -29,13 +29,13 @@ class StudentAdmin(admin.ModelAdmin):
 
 @admin.register(Teacher)
 class TeacherAdmin(admin.ModelAdmin):
-    list_display = ('id', 'firstname', 'lastname', 'fathername', 'department', 'email', 'additionalInfo', 'registrationDate')  # Поля для отображения
-    search_fields = ('lastname', 'firstname', 'fathername', 'email', 'department__name')                    # Поля для поиска
+    list_display = ('id', 'firstname', 'lastname', 'fathername', 'department', 'additionalInfo', 'registrationDate')  # Поля для отображения
+    search_fields = ('lastname', 'firstname', 'fathername', 'department__name')                    # Поля для поиска
     list_filter = ('department', 'registrationDate')                                                       # Фильтры по департаменту и дате
     ordering = ('lastname', 'firstname', 'fathername')                                                     # Сортировка
     fieldsets = (                                                                                          # Группировка полей
         ('Основная информация', {
-            'fields': ('lastname', 'firstname', 'fathername', 'department', 'email', 'additionalInfo')
+            'fields': ('lastname', 'firstname', 'fathername', 'department', 'additionalInfo')
         }),
         ('Пароль', {
             'fields': ('password',),
