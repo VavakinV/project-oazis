@@ -20,12 +20,13 @@ from oazis import views
 
 urlpatterns = [
     path('admin/', admin.site.urls),
-    re_path(r'^api/students/$', views.students_list),
-    re_path(r'^api/students/([0-9])$', views.students_detail),
-    re_path(r'^api/teachers/$', views.teachers_list),
-    re_path(r'^api/teachers/([0-9])$', views.teachers_detail),
-    re_path(r'^api/departments/$', views.departments_list),
-    re_path(r'^api/departments/([0-9])$', views.departments_detail),
-    re_path(r'api/courseworks/$', views.courseworks_list),
-    re_path(r'api/courseworks/([0-9])$', views.courseworks_detail)
+    path('api/students/', views.students_list),
+    path('api/students/<int:pk>/', views.students_detail),
+    path('api/teachers/', views.teachers_list),
+    path('api/teachers/<int:pk>/', views.teachers_detail),
+    path('api/departments/', views.departments_list),
+    path('api/departments/<int:pk>/', views.departments_detail),
+    path('api/courseworks/', views.courseworks_list, name='courseworks-list'),
+    path('api/courseworks/<int:pk>/', views.courseworks_detail, name='courseworks-detail'),
+    path('api/teacher-login/', views.teacher_login, name='teacher_login'),
 ]

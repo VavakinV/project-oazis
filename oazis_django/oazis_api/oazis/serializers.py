@@ -7,13 +7,19 @@ class StudentSerializer(serializers.ModelSerializer):
     fathername = serializers.RegexField(regex=r'^[A-Za-zА-ЯЁа-яё\-]+$', max_length=240, required=True)
     group = serializers.RegexField(regex=r'^[A-Za-z0-9А-ЯЁа-яё\-\.\/]+$', max_length=20, required=True)
     email = serializers.EmailField(required=True)
-    password = serializers.CharField(max_length=50, required=True)
-    contactInfo = serializers.CharField(max_length=500)
+    password = serializers.CharField(max_length=1000, required=True)
+    contactInfo = serializers.CharField(max_length=1000)
     registrationDate = serializers.DateField(read_only=True)
 
     class Meta:
         model = Student
         fields = '__all__'
+        extra_kwargs = {
+            'contactInfo': {
+                'required': False,
+                'allow_blank': True
+            },
+        }
 
     def create(self, validated_data):
         password = validated_data.pop('password')
@@ -37,9 +43,15 @@ class TeacherSerializer(serializers.ModelSerializer):
     firstname = serializers.RegexField(regex=r'^[A-Za-zА-ЯЁа-яё\-]+$', max_length=240, required=True)
     fathername = serializers.RegexField(regex=r'^[A-Za-zА-ЯЁа-яё\-]+$', max_length=240)
     department = serializers.PrimaryKeyRelatedField(queryset=Department.objects.all(), required=True)
-    password = serializers.CharField(max_length=50, required=True)
-    additionalInfo = serializers.CharField(max_length=500)
+    password = serializers.CharField(max_length=1000, required=True)
+    additionalInfo = serializers.CharField(max_length=1000)
     registrationDate = serializers.DateField(read_only=True)
+
+    current_password = serializers.CharField(
+        write_only=True,
+        required=True,
+        help_text="Текущий пароль для подтверждения изменений"
+    )
 
     class Meta:
         model = Teacher
@@ -53,6 +65,11 @@ class TeacherSerializer(serializers.ModelSerializer):
         return teacher
 
     def update(self, instance, validated_data):
+        current_password = validated_data.get('current_password')
+        
+        if not instance.check_password(current_password):
+            raise serializers.ValidationError({"current_password": "Неверный пароль"})
+
         password = validated_data.get('password', None)
         if password:
             instance.set_password(password)
@@ -65,12 +82,19 @@ class CourseworkSerializer(serializers.ModelSerializer):
     class Meta:
         model = Coursework
         fields = '__all__'
+        extra_kwargs = {
+            'student': {'required': False},
+            'main_teacher': {'required': False},
+            'backup_teacher': {'required': False},
+            'topic': {'required': False},
+            'creationDate': {'read_only': True}
+        }
 
 class DepartmentSerializer(serializers.ModelSerializer):
     name = serializers.RegexField(regex=r'^[A-Za-zА-ЯЁа-яё\-]+$', max_length=240, required=True)
 
     class Meta:
-        model = Teacher
+        model = Department
         fields = '__all__'
 
     def create(self, validated_data):

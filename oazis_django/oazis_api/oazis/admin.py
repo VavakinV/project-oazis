@@ -1,3 +1,4 @@
+from django import forms
 from django.contrib import admin
 from .models import Department, Student, Teacher, Coursework
 
@@ -27,6 +28,25 @@ class StudentAdmin(admin.ModelAdmin):
     )
     readonly_fields = ('registrationDate',)  # Поля только для чтения
 
+class TeacherAdminForm(forms.ModelForm):
+    password = forms.CharField(
+        widget=forms.PasswordInput(render_value=True),
+        required=False
+    )
+    
+    class Meta:
+        model = Teacher
+        fields = '__all__'
+    
+    def save(self, commit=True):
+        teacher = super().save(commit=False)
+        password = self.cleaned_data.get('password')
+        if password:
+            teacher.set_password(password)
+        if commit:
+            teacher.save()
+        return teacher
+
 @admin.register(Teacher)
 class TeacherAdmin(admin.ModelAdmin):
     list_display = ('id', 'firstname', 'lastname', 'fathername', 'department', 'additionalInfo', 'registrationDate')  # Поля для отображения
@@ -46,6 +66,13 @@ class TeacherAdmin(admin.ModelAdmin):
         }),
     )
     readonly_fields = ('registrationDate',)  # Поля только для чтения
+
+    def get_form(self, request, obj=None, **kwargs):
+        form = super().get_form(request, obj, **kwargs)
+        # Для существующего объекта скрываем текущий пароль
+        if obj:
+            form.base_fields['password'].help_text = "Оставьте пустым, чтобы сохранить текущий пароль"
+        return form
 
 @admin.register(Coursework)
 class CourseworkAdmin(admin.ModelAdmin):

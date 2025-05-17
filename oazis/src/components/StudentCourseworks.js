@@ -1,11 +1,18 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import '../css/StudentCourseworks.css';
+import CourseworkApplicationForm from './CourseworkApplicationForm';
+import StudentProfile from './StudentProfile';
+import TeacherProfile from './TeacherProfile';
 
 const StudentCourseworks = () => {
     const [courseworks, setCourseworks] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
     const [teachers, setTeachers] = useState({});
+    const [showApplicationForm, setShowApplicationForm] = useState(false);
+    const [showProfile, setShowProfile] = useState(false);
+    const [showTeacherProfile, setShowTeacherProfile] = useState(false);
+    const [selectedTeacherId, setSelectedTeacherId] = useState(null);
 
     const studentId = sessionStorage.getItem('currentStudentId');
     
@@ -20,44 +27,43 @@ const StudentCourseworks = () => {
         }
     };
 
+    const fetchCourseworks = async () => {
+        try {
+            const [courseworksRes, teachersRes] = await Promise.all([
+                fetch(`http://127.0.0.1:8000/api/courseworks/`),
+                fetch(`http://127.0.0.1:8000/api/teachers/`)
+            ]);
+
+            if (!courseworksRes.ok || !teachersRes.ok) {
+                throw new Error('Ошибка при загрузке данных');
+            }
+
+            const [courseworksData, teachersData] = await Promise.all([
+                courseworksRes.json(),
+                teachersRes.json()
+            ]);
+
+            const teachersMap = teachersData.reduce((acc, teacher) => {
+                acc[teacher.id] = formatTeacherName(teacher);
+                return acc;
+            }, {});
+
+            setTeachers(teachersMap);
+            setCourseworks(courseworksData.filter(cw => cw.student == studentId));
+        } catch (error) {
+            setError(error.message);
+        } finally {
+            setLoading(false);
+        }
+    };
+
     useEffect(() => {
         if (!studentId) {
             setError('Студент не выбран');
             setLoading(false);
             return;
         }
-
-        const fetchData = async () => {
-            try {
-                const [courseworksRes, teachersRes] = await Promise.all([
-                    fetch(`http://127.0.0.1:8000/api/courseworks/`),
-                    fetch(`http://127.0.0.1:8000/api/teachers/`)
-                ]);
-
-                if (!courseworksRes.ok || !teachersRes.ok) {
-                    throw new Error('Ошибка при загрузке данных');
-                }
-
-                const [courseworksData, teachersData] = await Promise.all([
-                    courseworksRes.json(),
-                    teachersRes.json()
-                ]);
-
-                const teachersMap = teachersData.reduce((acc, teacher) => {
-                    acc[teacher.id] = formatTeacherName(teacher);
-                    return acc;
-                }, {});
-
-                setTeachers(teachersMap);
-                setCourseworks(courseworksData.filter(cw => cw.student == studentId));
-            } catch (error) {
-                setError(error.message);
-            } finally {
-                setLoading(false);
-            }
-        };
-
-        fetchData();
+        fetchCourseworks();
     }, [studentId]);
 
     const formatTeacherName = (teacher) => {
@@ -66,6 +72,15 @@ const StudentCourseworks = () => {
         const firstInitial = firstname ? `${firstname[0]}.` : '';
         const fatherInitial = fathername ? ` ${fathername[0]}.` : '';
         return `${lastname} ${firstInitial}${fatherInitial}`.trim();
+    };
+
+    const handleNewApplication = () => {
+        setShowApplicationForm(true);
+    };
+
+    const handleApplicationSubmitted = () => {
+        setShowApplicationForm(false);
+        fetchCourseworks();
     };
 
     const getStatusClass = (status) => {
@@ -100,15 +115,96 @@ const StudentCourseworks = () => {
         </div>
     );
 
+    if (showApplicationForm) {
+        return <CourseworkApplicationForm 
+            studentId={studentId}
+            onCancel={() => setShowApplicationForm(false)}
+            onSuccess={handleApplicationSubmitted}
+        />;
+    }
+
+    const handleProfileNavigation = () => {
+        setShowProfile(true);
+    };
+
+    const handleReturnToCourseworks = () => {
+        setShowProfile(false);
+        setShowApplicationForm(false);
+    };
+
+    if (showProfile) {
+        return (
+            <div className="panel">
+                <button 
+                    className="button return-button"
+                    onClick={handleReturnToCourseworks}
+                >
+                    ← Вернуться к курсовым работам
+                </button>
+                <StudentProfile />
+            </div>
+        );
+    }
+
+    if (showApplicationForm) {
+        return <CourseworkApplicationForm 
+            studentId={studentId}
+            onCancel={() => setShowApplicationForm(false)}
+            onSuccess={handleApplicationSubmitted}
+        />;
+    }
+    const handleTeacherClick = (teacherId) => {
+        setSelectedTeacherId(teacherId);
+        setShowTeacherProfile(true);
+    };
+
+    const handleBackFromProfile = () => {
+        setShowTeacherProfile(false);
+        setSelectedTeacherId(null);
+    };
+
+    if (showTeacherProfile) {
+        return (
+            <div className="panel">
+                <button 
+                    className="button back-button"
+                    onClick={handleBackFromProfile}
+                >
+                    ← Назад к моим работам
+                </button>
+                <TeacherProfile id={selectedTeacherId} />
+            </div>
+        );
+    }
+
     return (
         <div className="panel coursework-panel">
             <div className="coursework-header">
                 <h2>Мои курсовые работы</h2>
-                <button className="button logout-button" onClick={handleLogout}>
-                    Выйти
-                </button>
+                <div className="header-buttons">
+                    <div className="action-buttons">
+                        <button 
+                            className="button profile-button"
+                            onClick={handleProfileNavigation}
+                        >
+                            Профиль
+                        </button>
+                        <button 
+                            className="button new-application-button"
+                            onClick={handleNewApplication}
+                        >
+                            Подать новую заявку
+                        </button>
+                        <button 
+                            className="button logout-button" 
+                            onClick={handleLogout}
+                        >
+                            Выйти
+                        </button>
+                    </div>
+                </div>
             </div>
-            
+
             {courseworks.length === 0 ? (
                 <div className="no-courseworks">
                     <p>У вас нет активных курсовых работ</p>
@@ -133,8 +229,26 @@ const StudentCourseworks = () => {
                                     <td className="topic-cell" title={cw.topic || 'Тема не указана'}>
                                         {cw.topic || '—'}
                                     </td>
-                                    <td>{teachers[cw.main_teacher] || '—'}</td>
-                                    <td>{cw.backup_teacher ? (teachers[cw.backup_teacher] || '—') : '—'}</td>
+                                    <td>
+                                        {cw.main_teacher && (
+                                            <span 
+                                                className="teacher-link"
+                                                onClick={() => handleTeacherClick(cw.main_teacher)}
+                                            >
+                                                {teachers[cw.main_teacher] || '—'}
+                                            </span>
+                                        )}
+                                    </td>
+                                    <td>
+                                        {cw.backup_teacher && (
+                                            <span 
+                                                className="teacher-link"
+                                                onClick={() => handleTeacherClick(cw.backup_teacher)}
+                                            >
+                                                {teachers[cw.backup_teacher] || '—'}
+                                            </span>
+                                        )}
+                                    </td>
                                     <td>
                                         <span className={`status-badge ${getStatusClass(cw.status)}`}>
                                             {renderStatus(cw.status)}
@@ -164,3 +278,4 @@ const StudentCourseworks = () => {
 };
 
 export default StudentCourseworks;
+

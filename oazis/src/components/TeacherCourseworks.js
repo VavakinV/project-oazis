@@ -1,5 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import '../css/TeacherCourseworks.css';
+import TeacherProfile from './TeacherProfile';
+import StudentProfile from './StudentProfile'; 
 
 const TeacherCourseworks = () => {
     const [courseworks, setCourseworks] = useState([]);
@@ -7,11 +9,14 @@ const TeacherCourseworks = () => {
     const [error, setError] = useState(null);
     const [students, setStudents] = useState({});
     const [editingId, setEditingId] = useState(null);
+    const [showStudentProfile, setShowStudentProfile] = useState(false);
+    const [selectedStudentId, setSelectedStudentId] = useState(null);
     const [editForm, setEditForm] = useState({
         status: '',
         grade: '',
         has_application: false
     });
+    const [showProfile, setShowProfile] = useState(false);
 
     const teacherId = sessionStorage.getItem('currentTeacherId');
 
@@ -111,28 +116,45 @@ const TeacherCourseworks = () => {
 
     const handleSave = async (id) => {
         try {
+            const formData = {
+                status: parseInt(editForm.status),
+                grade: editForm.grade ? parseInt(editForm.grade) : null,
+                has_application: editForm.has_application,
+                last_updated_by: teacherId
+            };
+
+            // Получение CSRF токена
+            const getCsrfToken = () => {
+                return document.cookie
+                    .split('; ')
+                    .find(row => row.startsWith('csrftoken='))
+                    ?.split('=')[1] || '';
+            };
+
             const response = await fetch(`http://127.0.0.1:8000/api/courseworks/${id}/`, {
-                method: 'PUT',
+                method: 'PATCH',
                 headers: {
                     'Content-Type': 'application/json',
+                    'X-CSRFToken': getCsrfToken(),
                 },
-                body: JSON.stringify({
-                    ...editForm,
-                    grade: editForm.grade || null
-                })
+                credentials: 'include',
+                body: JSON.stringify(formData)
             });
 
             if (!response.ok) {
-                throw new Error('Ошибка при сохранении изменений');
+                const errorData = await response.json();
+                throw new Error(errorData.detail || Object.values(errorData).join(', '));
             }
 
+            // Обновляем состояние
+            const updatedData = await response.json();
             setCourseworks(courseworks.map(cw => 
-                cw.id === id ? { ...cw, ...editForm } : cw
+                cw.id === id ? {...cw, ...updatedData} : cw
             ));
             setEditingId(null);
         } catch (error) {
-            console.error('Ошибка:', error);
-            alert('Не удалось сохранить изменения');
+            console.error('Ошибка сохранения:', error);
+            alert(`Ошибка: ${error.message}`);
         }
     };
 
@@ -158,13 +180,70 @@ const TeacherCourseworks = () => {
         </div>
     );
 
+    const handleProfileNavigation = () => {
+        setShowProfile(true);
+    };
+
+    const handleReturnToCourseworks = () => {
+        setShowProfile(false);
+    };
+
+    const handleStudentClick = (studentId) => {
+        setSelectedStudentId(studentId);
+        setShowStudentProfile(true);
+    };
+
+    const handleBackFromProfile = () => {
+        setShowStudentProfile(false);
+        setSelectedStudentId(null);
+    };
+
+    if (showProfile) {
+        return (
+            <div className="panel">
+                <button 
+                    className="button return-button"
+                    onClick={handleReturnToCourseworks}
+                >
+                    ← Вернуться к курсовым работам
+                </button>
+                <TeacherProfile />
+            </div>
+        );
+    }
+
+    if (showStudentProfile) {
+        return (
+            <div className="panel">
+                <button 
+                    className="button back-button"
+                    onClick={handleBackFromProfile}
+                >
+                    ← Назад к списку работ
+                </button>
+                <StudentProfile id={selectedStudentId} />
+            </div>
+        );
+    }
+
     return (
         <div className="panel coursework-panel">
             <div className="coursework-header">
                 <h2>Курсовые работы под моим руководством</h2>
-                <button className="button logout-button" onClick={handleLogout}>
-                    Выйти
-                </button>
+                <div className="header-buttons">
+                    <button 
+                        className="button profile-button"
+                        onClick={handleProfileNavigation}
+                    >
+                        Профиль
+                    </button>
+                    <button 
+                        className="button logout-button" 
+                        onClick={handleLogout}
+                    >
+                        Выйти
+                    </button>
+                </div>
             </div>
             
             {courseworks.length === 0 ? (
@@ -192,7 +271,14 @@ const TeacherCourseworks = () => {
                                     <td className="topic-cell" title={cw.topic || 'Тема не указана'}>
                                         {cw.topic || '—'}
                                     </td>
-                                    <td>{students[cw.student] || '—'}</td>
+                                    <td>
+                                        <span 
+                                            className="student-link"
+                                            onClick={() => handleStudentClick(cw.student)}
+                                        >
+                                            {students[cw.student] || '—'}
+                                        </span>
+                                    </td>
                                     <td>
                                         {cw.main_teacher == teacherId ? 'Основной' : 'Запасной'}
                                     </td>

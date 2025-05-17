@@ -13,8 +13,8 @@ class Student(models.Model):
     fathername = models.CharField("Fathername", max_length=240, blank=True, null=True)
     group = models.CharField("Group", max_length=20)
     email = models.EmailField(blank=True, null=True)
-    password = models.CharField("Password", max_length=50, blank=True, null=True)
-    contactInfo = models.CharField("ContactInfo", max_length=500, blank=True, null=True)
+    password = models.CharField("Password", max_length=1000, blank=True, null=True)
+    contactInfo = models.CharField("ContactInfo", max_length=1000, blank=True, null=True)
     registrationDate = models.DateField("Registration Date", auto_now_add=True)
 
     def set_password(self, raw_password):
@@ -32,8 +32,8 @@ class Teacher(models.Model):
     firstname = models.CharField("Firstname", max_length=240)
     fathername = models.CharField("Fathername", max_length=240, blank=True, null=True)
     department = models.ForeignKey(Department, on_delete=models.CASCADE)
-    password = models.CharField("Password", max_length=50)
-    additionalInfo = models.CharField("AdditionalInfo", max_length=500, blank=True, null=True)
+    password = models.CharField("Password", max_length=1000)
+    additionalInfo = models.CharField("AdditionalInfo", max_length=1000, blank=True, null=True)
     registrationDate = models.DateField("Registration Date", auto_now_add=True)
 
     def set_password(self, raw_password):
@@ -53,6 +53,11 @@ class Teacher(models.Model):
         
         short_name = f"{lastname} {formatted_firstname}{formatted_fathername}".strip()
         return short_name
+
+    def save(self, *args, **kwargs):
+        if self.password and not self.password.startswith(('pbkdf2_sha256$', 'bcrypt$', 'argon2')):
+            self.set_password(self.password)
+        super().save(*args, **kwargs)
 
     def __str__(self):
         return f'{self.lastname} {self.firstname} {self.fathername}'

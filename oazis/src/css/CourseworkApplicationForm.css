@@ -1,0 +1,68 @@
+.application-form-panel {
+    max-width: 600px;
+    margin: 20px auto;
+    padding: 25px;
+    background-color: #fff;
+    border-radius: 10px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+}
+
+.application-form-panel h2 {
+    color: #19647E;
+    text-align: center;
+    margin-bottom: 25px;
+}
+
+.form-group {
+    margin-bottom: 20px;
+}
+
+.form-group label {
+    display: block;
+    margin-bottom: 8px;
+    font-weight: 500;
+    color: #19647E;
+}
+
+.teacher-select {
+    margin-bottom: 10px;
+}
+
+textarea {
+    width: 100%;
+    border: 1px solid #ced4da;
+    border-radius: 6px;
+    resize:none;
+    min-height: 80px;
+}
+
+.form-buttons {
+    display: flex;
+    gap: 15px;
+    justify-content: flex-end;
+    margin-top: 25px;
+}
+
+.submit-button {
+    background-color: #2ecc71;
+    padding: 10px 25px;
+}
+
+.submit-button:disabled {
+    background-color: #95a5a6;
+    cursor: not-allowed;
+}
+
+.cancel-button {
+    background-color: #e74c3c;
+    padding: 10px 25px;
+}
+
+.error-message {
+    color: #c62828;
+    background-color: #ffebee;
+    padding: 12px;
+    border-radius: 6px;
+    margin-bottom: 20px;
+    text-align: center;
+}

@@ -2,6 +2,8 @@ from rest_framework.response import Response
 from rest_framework.decorators import api_view
 from rest_framework import status
 
+from django.shortcuts import get_object_or_404
+
 from .models import Student, Teacher, Department, Coursework
 from .serializers import StudentSerializer, TeacherSerializer, DepartmentSerializer, CourseworkSerializer
 
@@ -24,11 +26,21 @@ def handle_detail(request, model, serializer_class, pk):
     except model.DoesNotExist:
         return Response(status=status.HTTP_404_NOT_FOUND)
 
-    if request.method == 'PUT':
-        serializer = serializer_class(instance, data=request.data, context={'request': request})
+    if request.method == 'GET':
+        serializer = serializer_class(instance)
+        return Response(serializer.data)
+
+    if request.method in ['PUT', 'PATCH']:
+        partial = request.method == 'PATCH'
+        serializer = serializer_class(
+            instance, 
+            data=request.data, 
+            context={'request': request}, 
+            partial=partial
+        )
         if serializer.is_valid():
             serializer.save()
-            return Response(serializer.data, status=status.HTTP_200_OK)
+            return Response(serializer.data)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
     elif request.method == 'DELETE':
@@ -39,7 +51,7 @@ def handle_detail(request, model, serializer_class, pk):
 def students_list(request):
     return handle_list(request, Student, StudentSerializer)
 
-@api_view(['PUT', 'DELETE'])
+@api_view(['GET', 'PUT', 'PATCH', 'DELETE'])
 def students_detail(request, pk):
     return handle_detail(request, Student, StudentSerializer, pk)
 
@@ -47,7 +59,7 @@ def students_detail(request, pk):
 def teachers_list(request):
     return handle_list(request, Teacher, TeacherSerializer)
 
-@api_view(['PUT', 'DELETE'])
+@api_view(['GET', 'PUT', 'PATCH', 'DELETE'])
 def teachers_detail(request, pk):
     return handle_detail(request, Teacher, TeacherSerializer, pk)
 
@@ -55,7 +67,7 @@ def teachers_detail(request, pk):
 def departments_list(request):
     return handle_list(request, Department, DepartmentSerializer)
 
-@api_view(['PUT', 'DELETE'])
+@api_view(['GET', 'PUT', 'DELETE'])
 def departments_detail(request, pk):
     return handle_detail(request, Department, DepartmentSerializer, pk)
 
@@ -63,6 +75,39 @@ def departments_detail(request, pk):
 def courseworks_list(request):
     return handle_list(request, Coursework, CourseworkSerializer)
 
-@api_view(['PUT', 'DELETE'])
+@api_view(['GET', 'PUT', 'PATCH', 'DELETE'])
 def courseworks_detail(request, pk):
     return handle_detail(request, Coursework, CourseworkSerializer, pk)
+
+@api_view(['POST'])
+def teacher_login(request):
+    try:
+        teacher_id = request.data.get('teacher_id')
+        password = request.data.get('password')
+        
+        if not teacher_id or not password:
+            return Response(
+                {'message': 'Требуется teacher_id и пароль'}, 
+                status=status.HTTP_400_BAD_REQUEST
+            )
+        
+        teacher = get_object_or_404(Teacher, pk=teacher_id)
+        
+        if not teacher.check_password(password):
+            return Response(
+                {'message': 'Неверный пароль'}, 
+                status=status.HTTP_401_UNAUTHORIZED
+            )
+        
+        serializer = TeacherSerializer(teacher)
+        return Response({
+            'message': 'Успешный вход',
+            'teacher': serializer.data
+        })
+        
+    except Exception as e:
+        return Response(
+            {'message': f'Ошибка сервера: {str(e)}'}, 
+            status=status.HTTP_500_INTERNAL_SERVER_ERROR
+        )
+
