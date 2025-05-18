@@ -114,7 +114,7 @@ const StudentProfile = ({ id }) => {
                 <div className="personal-info">
                     <h3>{studentData.lastname} {studentData.firstname} {studentData.fathername || ''}</h3>
                     <p><strong>Группа:</strong> {studentData.group}</p>
-                    <p><strong>Дата регистрации:</strong> 
+                    <p><strong>Дата регистрации: </strong> 
                         {new Date(studentData.registrationDate).toLocaleDateString('ru-RU')}
                     </p>
                 </div>

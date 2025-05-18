@@ -98,7 +98,7 @@ const TeacherProfile = ({ id }) => {
             const updatedData = await response.json();
             setTeacherData(updatedData);
             setIsEditing(false);
-            setPassword(''); // Очищаем поле пароля
+            setPassword('');
             alert('Изменения успешно сохранены!');
         } catch (err) {
             console.error('Ошибка сохранения:', err);
@@ -129,7 +129,7 @@ const TeacherProfile = ({ id }) => {
                 <div className="personal-info">
                     <h3>{teacherData.lastname} {teacherData.firstname} {teacherData.fathername || ''}</h3>
                     <p><strong>Кафедра:</strong> {department}</p>
-                    <p><strong>Дата регистрации:</strong> 
+                    <p><strong>Дата регистрации: </strong> 
                         {new Date(teacherData.registrationDate).toLocaleDateString('ru-RU')}
                     </p>
                 </div>

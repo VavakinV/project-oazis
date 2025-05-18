@@ -56,7 +56,7 @@ const StudentLogin = () => {
                     placeholder="Начните вводить ФИО..."
                     isSearchable
                     noOptionsMessage={() => "Студент не найден"}
-                    menuPortalTarget={document.body} // Рендерим меню в body
+                    menuPortalTarget={document.body}
                     styles={{
                         menuPortal: base => ({ ...base, zIndex: 9999 }),
                         control: (provided) => ({
